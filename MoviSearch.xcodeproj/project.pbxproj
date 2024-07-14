@@ -8,19 +8,23 @@
 
 /* Begin PBXBuildFile section */
 		0741D7742C3087B1002B40C3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0741D7732C3087B1002B40C3 /* AppDelegate.swift */; };
-		0741D7762C3087B1002B40C3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0741D7752C3087B1002B40C3 /* SceneDelegate.swift */; };
 		0741D7782C3087B1002B40C3 /* MovieSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0741D7772C3087B1002B40C3 /* MovieSearchViewController.swift */; };
 		0741D77B2C3087B1002B40C3 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 0741D77A2C3087B1002B40C3 /* Base */; };
 		0741D77E2C3087B1002B40C3 /* MoviSearch.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0741D77C2C3087B1002B40C3 /* MoviSearch.xcdatamodeld */; };
 		0741D7802C3087B2002B40C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0741D77F2C3087B2002B40C3 /* Assets.xcassets */; };
 		0741D7832C3087B2002B40C3 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 0741D7822C3087B2002B40C3 /* Base */; };
 		075528372C371E8600FC7E70 /* MovieDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075528362C371E8500FC7E70 /* MovieDetailsViewController.swift */; };
+		075924722C3E216A007BFE59 /* MovieService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075924712C3E216A007BFE59 /* MovieService.swift */; };
+		075924742C3E3551007BFE59 /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075924732C3E3551007BFE59 /* Movie.swift */; };
+		075924772C443A0A007BFE59 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 075924762C443A0A007BFE59 /* Nuke */; };
+		075924792C443A0A007BFE59 /* NukeExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 075924782C443A0A007BFE59 /* NukeExtensions */; };
+		0759247B2C443A0A007BFE59 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 0759247A2C443A0A007BFE59 /* NukeUI */; };
+		0759247F2C44549B007BFE59 /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0759247E2C44549B007BFE59 /* DataController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0741D7702C3087B1002B40C3 /* MoviSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoviSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0741D7732C3087B1002B40C3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0741D7752C3087B1002B40C3 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		0741D7772C3087B1002B40C3 /* MovieSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieSearchViewController.swift; sourceTree = "<group>"; };
 		0741D77A2C3087B1002B40C3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0741D77D2C3087B1002B40C3 /* MoviSearch.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MoviSearch.xcdatamodel; sourceTree = "<group>"; };
@@ -28,6 +32,9 @@
 		0741D7822C3087B2002B40C3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0741D7842C3087B2002B40C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		075528362C371E8500FC7E70 /* MovieDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailsViewController.swift; sourceTree = "<group>"; };
+		075924712C3E216A007BFE59 /* MovieService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieService.swift; sourceTree = "<group>"; };
+		075924732C3E3551007BFE59 /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
+		0759247E2C44549B007BFE59 /* DataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +42,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0759247B2C443A0A007BFE59 /* NukeUI in Frameworks */,
+				075924772C443A0A007BFE59 /* Nuke in Frameworks */,
+				075924792C443A0A007BFE59 /* NukeExtensions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,7 +71,6 @@
 			isa = PBXGroup;
 			children = (
 				0741D7732C3087B1002B40C3 /* AppDelegate.swift */,
-				0741D7752C3087B1002B40C3 /* SceneDelegate.swift */,
 				0741D7772C3087B1002B40C3 /* MovieSearchViewController.swift */,
 				0741D7792C3087B1002B40C3 /* Main.storyboard */,
 				0741D77F2C3087B2002B40C3 /* Assets.xcassets */,
@@ -69,6 +78,9 @@
 				0741D7842C3087B2002B40C3 /* Info.plist */,
 				0741D77C2C3087B1002B40C3 /* MoviSearch.xcdatamodeld */,
 				075528362C371E8500FC7E70 /* MovieDetailsViewController.swift */,
+				075924712C3E216A007BFE59 /* MovieService.swift */,
+				075924732C3E3551007BFE59 /* Movie.swift */,
+				0759247E2C44549B007BFE59 /* DataController.swift */,
 			);
 			path = MoviSearch;
 			sourceTree = "<group>";
@@ -89,6 +101,11 @@
 			dependencies = (
 			);
 			name = MoviSearch;
+			packageProductDependencies = (
+				075924762C443A0A007BFE59 /* Nuke */,
+				075924782C443A0A007BFE59 /* NukeExtensions */,
+				0759247A2C443A0A007BFE59 /* NukeUI */,
+			);
 			productName = MoviSearch;
 			productReference = 0741D7702C3087B1002B40C3 /* MoviSearch.app */;
 			productType = "com.apple.product-type.application";
@@ -117,6 +134,9 @@
 				Base,
 			);
 			mainGroup = 0741D7672C3087B1002B40C3;
+			packageReferences = (
+				075924752C443A0A007BFE59 /* XCRemoteSwiftPackageReference "Nuke" */,
+			);
 			productRefGroup = 0741D7712C3087B1002B40C3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -144,11 +164,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				075924742C3E3551007BFE59 /* Movie.swift in Sources */,
+				075924722C3E216A007BFE59 /* MovieService.swift in Sources */,
 				0741D77E2C3087B1002B40C3 /* MoviSearch.xcdatamodeld in Sources */,
 				075528372C371E8600FC7E70 /* MovieDetailsViewController.swift in Sources */,
 				0741D7782C3087B1002B40C3 /* MovieSearchViewController.swift in Sources */,
+				0759247F2C44549B007BFE59 /* DataController.swift in Sources */,
 				0741D7742C3087B1002B40C3 /* AppDelegate.swift in Sources */,
-				0741D7762C3087B1002B40C3 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -373,6 +395,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		075924752C443A0A007BFE59 /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Nuke.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		075924762C443A0A007BFE59 /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 075924752C443A0A007BFE59 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		075924782C443A0A007BFE59 /* NukeExtensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 075924752C443A0A007BFE59 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeExtensions;
+		};
+		0759247A2C443A0A007BFE59 /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 075924752C443A0A007BFE59 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		0741D77C2C3087B1002B40C3 /* MoviSearch.xcdatamodeld */ = {
