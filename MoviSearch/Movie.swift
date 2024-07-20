@@ -8,7 +8,6 @@
 import Foundation
 import UIKit
 
-
 struct MovieSearchResult: Codable {
     let results: [Movie]
 }

@@ -87,7 +87,12 @@
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="system" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="stp-sB-dpJ">
                                                                 <rect key="frame" x="147.66666666666666" y="0.0" width="282.33333333333337" height="4.333333333333333"/>
                                                                 <state key="normal" title="Button"/>
-                                                                <buttonConfiguration key="configuration" style="plain" title="See all"/>
+                                                                <buttonConfiguration key="configuration" style="plain" title="See all">
+                                                                    <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                </buttonConfiguration>
+                                                                <connections>
+                                                                    <segue destination="xNN-LU-hIC" kind="show" identifier="showFavorites" id="RDk-0k-OwJ"/>
+                                                                </connections>
                                                             </button>
                                                         </subviews>
                                                     </stackView>
@@ -151,6 +156,7 @@
                         <outlet property="mainStackView" destination="sJT-6x-YiS" id="bm0-gG-GxB"/>
                         <outlet property="searchBar" destination="C3b-gB-F1k" id="GtI-9d-ywB"/>
                         <outlet property="searchBarStackView" destination="lao-JH-n9Y" id="ptn-IK-QQq"/>
+                        <outlet property="seeAllButton" destination="stp-sB-dpJ" id="b0z-vf-o1I"/>
                         <outlet property="tableView" destination="TvS-Cm-flK" id="v4c-ij-BsU"/>
                         <outlet property="tableViewHeightConstraint" destination="sWd-a1-EcI" id="dTV-fY-6ix"/>
                         <segue destination="Vcs-Lc-WZG" kind="show" identifier="showMovieDetail" id="fvL-kd-qnE"/>
@@ -368,32 +374,79 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qfq-no-4g4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1956.2790697674418" y="-3.218884120171674"/>
+            <point key="canvasLocation" x="2873" y="-473"/>
         </scene>
-        <!--Collection View Controller-->
-        <scene sceneID="ekr-M2-cB5">
+        <!--FavoritesListViewController-->
+        <scene sceneID="uj1-Ww-zGQ">
             <objects>
-                <collectionViewController id="3zC-EI-hPm" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="HUJ-28-s99">
+                <viewController id="xNN-LU-hIC" userLabel="FavoritesListViewController" customClass="FavoritesViewController" customModule="MoviSearch" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="4dk-P6-fLd">
                         <rect key="frame" x="0.0" y="0.0" width="430" height="932"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="doQ-4E-9gO">
+                                <rect key="frame" x="0.0" y="68" width="430" height="830"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="FavoriteMovieCell" rowHeight="202" id="7Ee-JX-2Tl" customClass="FavoriteMovieCell" customModule="MoviSearch" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="50" width="430" height="202"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7Ee-JX-2Tl" id="kPI-iu-O35">
+                                            <rect key="frame" x="0.0" y="0.0" width="430" height="202"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="RnS-Cs-Oum">
+                                                    <rect key="frame" x="10" y="12" width="410" height="178"/>
+                                                    <subviews>
+                                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="w7H-LD-tVU">
+                                                            <rect key="frame" x="0.0" y="0.0" width="202.66666666666666" height="178"/>
+                                                        </imageView>
+                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="afY-ff-0EU" userLabel="MovieTitle">
+                                                            <rect key="frame" x="207.66666666666663" y="0.0" width="202.33333333333337" height="178"/>
+                                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                            <nil key="textColor"/>
+                                                            <nil key="highlightedColor"/>
+                                                        </label>
+                                                    </subviews>
+                                                </stackView>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <constraints>
+                                            <constraint firstAttribute="bottom" secondItem="RnS-Cs-Oum" secondAttribute="bottom" constant="12" id="Spx-3w-mKe"/>
+                                            <constraint firstItem="RnS-Cs-Oum" firstAttribute="top" secondItem="7Ee-JX-2Tl" secondAttribute="top" constant="12" id="eMA-R3-xrK"/>
+                                            <constraint firstAttribute="trailing" secondItem="RnS-Cs-Oum" secondAttribute="trailing" constant="10" id="yfp-hp-531"/>
+                                            <constraint firstItem="RnS-Cs-Oum" firstAttribute="leading" secondItem="7Ee-JX-2Tl" secondAttribute="leading" constant="10" id="zFo-C4-nzg"/>
+                                        </constraints>
+                                        <connections>
+                                            <outlet property="favoriteMovieImageView" destination="w7H-LD-tVU" id="ujx-bc-dFo"/>
+                                            <outlet property="favoriteMovieTitleLabel" destination="afY-ff-0EU" id="FbM-F3-IFe"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="xNN-LU-hIC" id="WOG-Q9-sOb"/>
+                                    <outlet property="delegate" destination="xNN-LU-hIC" id="FWb-gL-gKB"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="aij-ya-1Ub"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="yas-J5-B1U">
-                            <size key="itemSize" width="128" height="128"/>
-                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                        </collectionViewFlowLayout>
-                        <cells/>
-                        <connections>
-                            <outlet property="dataSource" destination="3zC-EI-hPm" id="TaB-hE-k7d"/>
-                            <outlet property="delegate" destination="3zC-EI-hPm" id="tZg-PM-RTP"/>
-                        </connections>
-                    </collectionView>
-                </collectionViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="v4B-s5-nQ1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                        <constraints>
+                            <constraint firstItem="doQ-4E-9gO" firstAttribute="leading" secondItem="aij-ya-1Ub" secondAttribute="leading" id="0hG-5W-jNc"/>
+                            <constraint firstItem="doQ-4E-9gO" firstAttribute="bottom" secondItem="aij-ya-1Ub" secondAttribute="bottom" id="4z3-9I-YCZ"/>
+                            <constraint firstItem="doQ-4E-9gO" firstAttribute="trailing" secondItem="aij-ya-1Ub" secondAttribute="trailing" id="5t0-z6-rvP"/>
+                            <constraint firstItem="doQ-4E-9gO" firstAttribute="top" secondItem="4dk-P6-fLd" secondAttribute="top" constant="68" id="ZZz-hk-UuQ"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="CjN-8X-5Eu"/>
+                    <connections>
+                        <outlet property="favoritesTableView" destination="doQ-4E-9gO" id="cmf-xF-wOP"/>
+                        <segue destination="Vcs-Lc-WZG" kind="show" identifier="showMovieDetail" id="nTi-eQ-AKi"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="E59-ti-b1H" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2990" y="8"/>
+            <point key="canvasLocation" x="2018" y="529"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="cGK-b4-kN6">
@@ -414,6 +467,9 @@
             <point key="canvasLocation" x="110.23255813953489" y="-3.8626609442060089"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="fvL-kd-qnE"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <image name="heart" catalog="system" width="128" height="107"/>
         <namedColor name="AccentColor">

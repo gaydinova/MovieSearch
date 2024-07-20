@@ -25,6 +25,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.overrideUserInterfaceStyle = .dark
+     
+        UINavigationBar.appearance().tintColor = UIColor.white
 
         // Initialize the Core Data stack
         let context = persistentContainer.viewContext

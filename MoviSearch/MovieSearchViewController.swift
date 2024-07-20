@@ -26,9 +26,12 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     
     @IBOutlet weak var searchBarStackView: UIStackView!
     
+    @IBOutlet weak var seeAllButton: UIButton!
+    
     var managedObjectContext: NSManagedObjectContext?
     var noResultsLabel: UILabel!
-   
+    var emptyStateLabel: UILabel!
+    
     var allMovies: [Movie] = []
     var filteredMovies: [Movie] = []
     let movieService = MovieService()
@@ -53,6 +56,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         favoritesStackView.spacing = 8
         favoritesScrollView.showsHorizontalScrollIndicator = true
         setupNoResultsLabel()
+        setupEmptyStateLabel()
         styleUI()
         applyTitleStylingToFavorites()
         hideTableView()
@@ -60,15 +64,13 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("viewWillAppear called")
         fetchFavorites()
     }
     
     @objc func handleFavoritesUpdate() {
-        print("handleFavoritesUpdate called")
         // Refetch favorites when notification is received
-          fetchFavorites()
-      }
+        fetchFavorites()
+    }
     
     func styleUI() {
         findMovieLabel.font = UIFont.boldSystemFont(ofSize: 24)
@@ -93,9 +95,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     }
     
     func fetchFavorites() {
-        print("fetchFavorites called")
         guard let context = managedObjectContext else {
-            print("Managed Object Context is not available.")
             return
         }
         let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
@@ -103,74 +103,80 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         do {
             let favorites = try context.fetch(fetchRequest)
             self.favorites = Set(favorites.map { Int($0.id) })
-            print("Fetched favorites: \(self.favorites)")
             updateFavoritesUI()
         } catch {
-            print("Failed to fetch favorites: \(error)")
+            showErrorAlert(message: "Failed to fetch favorites: \(error.localizedDescription)")
         }
     }
     
     func setupFavorites() {
-        print("Set up favroites called")
         NotificationCenter.default.addObserver(self, selector: #selector(updateFavorites(_:)), name: .didUpdateFavorites, object: nil)
     }
     
     @objc func updateFavorites(_ notification: Notification) {
-        print("updateFavorites called")
         guard let userInfo = notification.userInfo,
               let movieId = userInfo["movieId"] as? Int,
-              let isFavorite = userInfo["isFavorite"] as? Bool else { 
-            print("failed to get favorites info")
-            return }
-        
+              let isFavorite = userInfo["isFavorite"] as? Bool else {
+            return
+        }
+
         if isFavorite {
             favorites.insert(movieId)
         } else {
             favorites.remove(movieId)
         }
-        print("Favorites updated: \(favorites)")
         updateFavoritesUI()
     }
     
     func updateFavoritesUI() {
-           print("updateFavoritesUI called")
-           favoritesStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-           
-           guard let context = managedObjectContext else {
-               print("Managed Object Context is not available.")
-               return
-           }
-           
-           // Perform a fetch request to get all favorited movies
-           let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
-           
-           do {
-               let favorites = try context.fetch(fetchRequest)
-               print("Fetched favorite movies from Core Data: \(favorites.count)")
-               favoritesStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-               
-               // Iterate over each favorited movie and create a view for it
-               for favorited in favorites {
-                   print("Creating view for favorited movie: \(favorited.title ?? "No Title")")
-                   createMovieView(for: favorited)
-               }
-               
-           } catch let error as NSError {
-               print("Could not fetch favorites: \(error), \(error.userInfo)")
-           }
-       }
+        favoritesStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        guard let context = managedObjectContext else {
+            return
+        }
+        
+        let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
+        
+        do {
+            let favorites = try context.fetch(fetchRequest)
+            if favorites.isEmpty {
+                emptyStateLabel.isHidden = false
+                favoritesLabelHorizontalStackView.isHidden = true
+            } else {
+                emptyStateLabel.isHidden = true
+                favoritesLabelHorizontalStackView.isHidden = false
+                for favorited in favorites {
+                    createMovieView(for: favorited)
+                }
+            }
+        } catch let error as NSError {
+            showErrorAlert(message: "Could not fetch favorites: \(error.localizedDescription)")
+        }
+    }
     
     func createMovieView(for favoriteMovie: FavoriteMovie) {
         let moviePosterView = UIImageView()
+        let placeholderImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+        let failureImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
         if let posterPath = favoriteMovie.posterPath, let posterUrl = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") {
-            NukeExtensions.loadImage(with: posterUrl, into: moviePosterView)
+            let options = ImageLoadingOptions(
+                placeholder: placeholderImage,
+                failureImage: failureImage,
+                contentModes: .init(
+                    success: .scaleAspectFill,
+                    failure: .scaleAspectFit,
+                    placeholder: .scaleAspectFill
+                )
+            )
+            
+            NukeExtensions.loadImage(with: posterUrl, options: options, into: moviePosterView)
         }
         moviePosterView.contentMode = .scaleAspectFill
         moviePosterView.clipsToBounds = true
         moviePosterView.layer.cornerRadius = 10
         moviePosterView.translatesAutoresizingMaskIntoConstraints = false
         moviePosterView.heightAnchor.constraint(equalToConstant: 300).isActive = true
-        moviePosterView.widthAnchor.constraint(equalToConstant: 300).isActive = true
+        moviePosterView.widthAnchor.constraint(equalToConstant: 240).isActive = true
         
         let movieTitleLabel = UILabel()
         movieTitleLabel.text = favoriteMovie.title
@@ -181,11 +187,11 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         movieTitleLabel.numberOfLines = 0
         movieTitleLabel.lineBreakMode = .byWordWrapping
         movieTitleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
-       
+        
         let movieContainer = UIStackView(arrangedSubviews: [moviePosterView, movieTitleLabel])
         movieContainer.axis = .vertical
         movieContainer.alignment = .fill
-        movieContainer.spacing = 3
+        movieContainer.spacing = 7
         movieContainer.translatesAutoresizingMaskIntoConstraints = false
         
         // Add tap gesture recognizer to the container
@@ -198,19 +204,21 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     
     @objc func movieTapped(_ sender: UITapGestureRecognizer) {
         guard let movieId = sender.view?.tag else { return }
-        getMovieDetails(movieId: movieId) { [weak self] movieDetails in
-            guard let movieDetails = movieDetails else { return }
+        getMovieDetails(movieId: movieId) { [weak self] result in
             DispatchQueue.main.async {
-                self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
+                switch result {
+                case .success(let movieDetails):
+                    self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
+                case .failure(let error):
+                    self?.showErrorAlert(message: error.localizedDescription)
+                }
             }
         }
     }
     
-    func getMovieDetails(movieId: Int, completion: @escaping (MovieDetails?) -> Void) {
-          movieService.getMovieDetails(movieId: movieId) { movieDetails in
-              completion(movieDetails)
-          }
-      }
+    func getMovieDetails(movieId: Int, completion: @escaping (Result<MovieDetails, MovieServiceError>) -> Void) {
+        movieService.getMovieDetails(movieId: movieId, completion: completion)
+    }
     
     func setupNoResultsLabel() {
         noResultsLabel = UILabel()
@@ -230,21 +238,36 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         noResultsLabel.isHidden = true
     }
     
+    func setupEmptyStateLabel() {
+        emptyStateLabel = UILabel()
+        emptyStateLabel.text = "You have no favorite movies yet."
+        emptyStateLabel.textColor = .white
+        emptyStateLabel.textAlignment = .center
+        emptyStateLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyStateLabel)
+        
+        NSLayoutConstraint.activate([
+            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        emptyStateLabel.isHidden = true
+    }
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
             filteredMovies = []
             hideTableView()
             tableView.reloadData()
-            self.noResultsLabel.isHidden = true
+            noResultsLabel.isHidden = true
         } else {
-            movieService.searchMovies(query: searchText) { [weak self] movies in
+            movieService.searchMovies(query: searchText) { [weak self] result in
                 DispatchQueue.main.async {
-                    if let movies = movies {
-                        print("Search results: \(movies)")
+                    switch result {
+                    case .success(let movies):
                         self?.filteredMovies = movies
                         self?.noResultsLabel.isHidden = true
-                    } else {
-                        print("No movies found")
+                    case .failure:
                         self?.filteredMovies = []
                         self?.noResultsLabel.isHidden = false
                     }
@@ -258,6 +281,12 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
                 }
             }
         }
+    }
+    
+    func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
     
     private func updateTableViewHeight() {
@@ -294,27 +323,19 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        print("Segue identifier: \(String(describing: segue.identifier))")
-        
         if segue.identifier == "showMovieDetail" {
-            print("Segue identifier matches")
-            
-            if let destinationVC = segue.destination as? MovieDetailsViewController {
-                print("Destination is MovieDetailsViewController")
-                
-                if let movieDetails = sender as? MovieDetails {
-                    print("Sender is MovieDetails")
-                    destinationVC.movieDetails = movieDetails
-                    destinationVC.managedObjectContext = managedObjectContext
-                    print("Preparing segue for movie: \(movieDetails)")
-                } else {
-                    print("Sender is not MovieDetails")
-                }
+            if let destinationVC = segue.destination as? MovieDetailsViewController,
+               let movieDetails = sender as? MovieDetails {
+                destinationVC.movieDetails = movieDetails
+                destinationVC.isFromFavorites = false
+                destinationVC.managedObjectContext = managedObjectContext
             } else {
-                print("Destination is not MovieDetailsViewController")
+                showErrorAlert(message: "Failed to pass movie details.")
             }
-        } else {
-            print("Segue identifier does not match")
+        } else if segue.identifier == "showFavorites" {
+            if let favoritesVC = segue.destination as? FavoritesViewController {
+                favoritesVC.managedObjectContext = managedObjectContext
+            }
         }
     }
 }
@@ -325,28 +346,27 @@ extension MovieSearchViewController {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-           guard indexPath.row < filteredMovies.count else {
-               fatalError("Index out of range. Ensure that filteredMovies array and table view are synchronized.")
-           }
-           
-           let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-           cell.textLabel?.text = filteredMovies[indexPath.row].title
-           return cell
-       }
+        guard indexPath.row < filteredMovies.count else {
+            showErrorAlert(message: "Something went wrong. Please try again.")
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+                  cell.textLabel?.text = "Error: Something went wrong"
+                  return cell
+        }
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.text = filteredMovies[indexPath.row].title
+        return cell
+    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedMovie = filteredMovies[indexPath.row]
-        print("Selected movie: \(selectedMovie)")
-        movieService.getMovieDetails(movieId: selectedMovie.id) { [weak self] movieDetails in
+        movieService.getMovieDetails(movieId: selectedMovie.id) { [weak self] result in
             DispatchQueue.main.async {
-                print("Movie details callback")
-                if let movieDetails = movieDetails {
-                    print("Fetched movie details: \(movieDetails)")
-                    print("Type of movieDetails: \(type(of: movieDetails))")
+                switch result {
+                case .success(let movieDetails):
                     self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
-                    print("Performing segue with movie details")
-                } else {
-                    print("Failed to fetch movie details")
+                case .failure(let error):
+                    self?.showErrorAlert(message: error.localizedDescription)
                 }
             }
         }

@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import CoreData
+import NukeExtensions
 
 class MovieDetailsViewController: UIViewController {
     
@@ -36,22 +37,26 @@ class MovieDetailsViewController: UIViewController {
     
     var managedObjectContext: NSManagedObjectContext?
     var movieDetails: MovieDetails?
-    
+    let movieService = MovieService()
+    var isFromFavorites: Bool = false
+ 
     override func viewDidLoad() {
-         super.viewDidLoad()
+          super.viewDidLoad()
+          view.backgroundColor = UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 1.0)
 
-         view.backgroundColor = UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 1.0)
-         if let movie = self.movieDetails {
-             self.updateUI(with: movie)
-         }
+          if let movie = self.movieDetails {
+              self.updateUI(with: movie)
+          } else {
+              showErrorAlert(message: "Movie details are not available.")
+          }
 
-         let favoriteTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleFavorite))
-         favoriteIcon.addGestureRecognizer(favoriteTapGesture)
-         favoriteIcon.isUserInteractionEnabled = true
-         print("Tap gesture added and user interaction enabled")
-         styleUI()
-         addDescriptionDivider()
-     }
+          let favoriteTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleFavorite))
+          favoriteIcon.addGestureRecognizer(favoriteTapGesture)
+          favoriteIcon.isUserInteractionEnabled = true
+
+          styleUI()
+          addDescriptionDivider()
+      }
     
     override func viewWillAppear(_ animated: Bool) {
           super.viewWillAppear(animated)
@@ -62,41 +67,23 @@ class MovieDetailsViewController: UIViewController {
           didSet {
               DispatchQueue.main.async {
                   self.favoriteIcon.image = self.isFavorite ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
-                  print("Favorite icon updated: \(self.isFavorite)")
               }
           }
       }
-    
-    func checkIfFavorite(movieId: Int) {
-        guard let context = managedObjectContext else {
-            print("Managed object context or movie ID not available")
-            return
-        }
-         
-         let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
-         fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
-         
-         do {
-             let results = try context.fetch(fetchRequest)
-             isFavorite = !results.isEmpty
-         } catch {
-             print("Failed to fetch favorite status: \(error)")
-         }
-     }
   
     func checkIfFavorite() {
-          guard let context = managedObjectContext, let movieId = movieDetails?.id else { return }
+           guard let context = managedObjectContext, let movieId = movieDetails?.id else { return }
 
-          let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
-          fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
+           let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
+           fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
 
-          do {
-              let results = try context.fetch(fetchRequest)
-              isFavorite = !results.isEmpty
-          } catch {
-              print("Failed to fetch favorite status: \(error)")
-          }
-      }
+           do {
+               let results = try context.fetch(fetchRequest)
+               isFavorite = !results.isEmpty
+           } catch {
+               showErrorAlert(message: "Failed to fetch favorite status: \(error.localizedDescription)")
+           }
+       }
     
     func updateFavoriteIcon() {
            DispatchQueue.main.async {
@@ -105,51 +92,44 @@ class MovieDetailsViewController: UIViewController {
        }
     
     @objc func toggleFavorite() {
-           print("Toggle favorite tapped")
-        guard let context = managedObjectContext, let movieId = movieDetails?.id else {
-            print("Managed object context or movie ID not available")
-            return
-        }
-           print("Toggling favorite status before: \(isFavorite)")
-           isFavorite.toggle()
-           print("Toggling favorite status after: \(isFavorite)")
-           updateFavoriteIcon()
+         guard let context = managedObjectContext, let movieId = movieDetails?.id else {
+             showErrorAlert(message: "Managed object context or movie ID not available")
+             return
+         }
+         
+         isFavorite.toggle()
+         updateFavoriteIcon()
 
-           DispatchQueue.global(qos: .background).async {
-               if self.isFavorite {
-                   // Add to favorites
-                   let favoritedMovie = FavoriteMovie(context: context)
-                   favoritedMovie.id = Int64(movieId)
-                   favoritedMovie.title = self.movieDetails?.title
-                   favoritedMovie.posterPath = self.movieDetails?.poster_path
-                   do {
-                       try context.save()
-                   } catch {
-                       print("Failed to save context: \(error)")
-                   }
-               } else {
-                   // Remove from favorites
-                   let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
-                   fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
-
-                   if let results = try? context.fetch(fetchRequest), let movieToDelete = results.first {
-                       context.delete(movieToDelete)
-                       do {
-                           try context.save()
-                       } catch {
-                           print("Failed to save context after deleting: \(error)")
-                       }
-                   }
-               }
-
-               // Notify other components of the app that favorites have been updated
-               DispatchQueue.main.async {
-                   NotificationCenter.default.post(name: .didUpdateFavorites, object: nil)
-               }
-           }
-       }
+         DispatchQueue.global(qos: .background).async {
+             do {
+                 if self.isFavorite {
+                     let favoritedMovie = FavoriteMovie(context: context)
+                     favoritedMovie.id = Int64(movieId)
+                     favoritedMovie.title = self.movieDetails?.title
+                     favoritedMovie.posterPath = self.movieDetails?.poster_path
+                 } else {
+                     let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
+                     fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
+                     
+                      let results = try context.fetch(fetchRequest)
+                     if let movieToDelete = results.first {
+                         context.delete(movieToDelete)
+                     }
+                 }
+                 try context.save()
+                 DispatchQueue.main.async {
+                     NotificationCenter.default.post(name: .didUpdateFavorites, object: nil)
+                 }
+             } catch {
+                 DispatchQueue.main.async {
+                     self.showErrorAlert(message: "Failed to update favorite status: \(error.localizedDescription)")
+                 }
+             }
+         }
+     }
     
     func updateUI(with movie: MovieDetails) {
+        favoriteIcon.isHidden = isFromFavorites
         self.movieName.text = movie.title
         self.descriptionText.text = movie.overview
         self.movieYear.text = movie.release_date
@@ -161,17 +141,22 @@ class MovieDetailsViewController: UIViewController {
             self.castName.text = castMembers.map { $0.name }.joined(separator: ", ")
         }
         
-        if let posterPath = movie.poster_path {
-            let posterUrl = "https://image.tmdb.org/t/p/w500\(posterPath)"
-            if let url = URL(string: posterUrl) {
-                DispatchQueue.global(qos: .userInitiated).async {
-                    if let data = try? Data(contentsOf: url) {
-                        DispatchQueue.main.async {
-                            self.moviePoster.image = UIImage(data: data)
-                        }
-                    }
-                }
-            }
+        let placeholderImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+        let failureImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
+
+        if let posterPath = movie.poster_path, let url = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") {
+            let options = ImageLoadingOptions(
+                placeholder: placeholderImage,
+                failureImage: failureImage,
+                contentModes: .init(
+                    success: .scaleAspectFill,
+                    failure: .scaleAspectFit,
+                    placeholder: .scaleAspectFill
+                )
+            )
+            NukeExtensions.loadImage(with: url, options: options, into: moviePoster)
+        } else {
+            moviePoster.image = placeholderImage
         }
     }
     
@@ -252,6 +237,12 @@ class MovieDetailsViewController: UIViewController {
         divider.backgroundColor = color
         divider.translatesAutoresizingMaskIntoConstraints = false
         return divider
+    }
+    
+    func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }
 
