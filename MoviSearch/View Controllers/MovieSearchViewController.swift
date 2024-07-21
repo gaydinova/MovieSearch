@@ -35,6 +35,8 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
     let movieService = MovieService()
     var movieDetails: MovieDetails?
     var favorites: Set<Int> = []
+    var activityIndicator: UIActivityIndicatorView!
+    var activityIndicatorBackground: UIView!
     
     // MARK: - Lifecycle Methods
     
@@ -42,6 +44,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
         super.viewDidLoad()
         setupView()
         setupObservers()
+        setupActivityIndicator()
         fetchFavorites()
     }
     
@@ -134,6 +137,28 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
         applyTitleStylingToFavorites()
     }
     
+    private func setupActivityIndicator() {
+         activityIndicatorBackground = UIView()
+         activityIndicatorBackground.backgroundColor = UIColor(white: 0, alpha: 0.7)
+         activityIndicatorBackground.translatesAutoresizingMaskIntoConstraints = false
+         activityIndicatorBackground.isHidden = true
+         view.addSubview(activityIndicatorBackground)
+         
+         activityIndicator = UIActivityIndicatorView(style: .large)
+         activityIndicator.color = .white
+         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+         activityIndicatorBackground.addSubview(activityIndicator)
+         
+         NSLayoutConstraint.activate([
+             activityIndicatorBackground.topAnchor.constraint(equalTo: view.topAnchor),
+             activityIndicatorBackground.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+             activityIndicatorBackground.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+             activityIndicatorBackground.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+             activityIndicator.centerXAnchor.constraint(equalTo: activityIndicatorBackground.centerXAnchor),
+             activityIndicator.centerYAnchor.constraint(equalTo: activityIndicatorBackground.centerYAnchor)
+         ])
+     }
+    
     // MARK: - UI Update Methods
     
     private func applyTitleStylingToFavorites() {
@@ -196,8 +221,10 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
     
     @objc func movieTapped(_ sender: UITapGestureRecognizer) {
         guard let movieId = sender.view?.tag else { return }
+        showActivityIndicator()
         getMovieDetails(movieId: movieId) { [weak self] result in
             DispatchQueue.main.async {
+                self?.hideActivityIndicator()
                 switch result {
                 case .success(let movieDetails):
                     self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
@@ -364,20 +391,36 @@ extension MovieSearchViewController {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedMovie = filteredMovies[indexPath.row]
-        movieService.getMovieDetails(movieId: selectedMovie.id) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let movieDetails):
-                    self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
-                case .failure(let error):
-                    self?.showErrorAlert(message: error.localizedDescription)
-                }
-            }
-        }
-    }
+         let selectedMovie = filteredMovies[indexPath.row]
+         showActivityIndicator()
+         movieService.getMovieDetails(movieId: selectedMovie.id) { [weak self] result in
+             DispatchQueue.main.async {
+                 self?.hideActivityIndicator()
+                 switch result {
+                 case .success(let movieDetails):
+                     self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
+                 case .failure(let error):
+                     self?.showErrorAlert(message: error.localizedDescription)
+                 }
+             }
+         }
+     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 40
     }
+}
+
+// MARK: - Activity Indicator Methods
+
+extension MovieSearchViewController {
+    private func showActivityIndicator() {
+         activityIndicatorBackground.isHidden = false
+         activityIndicator.startAnimating()
+     }
+
+     private func hideActivityIndicator() {
+         activityIndicatorBackground.isHidden = true
+         activityIndicator.stopAnimating()
+     }
 }
