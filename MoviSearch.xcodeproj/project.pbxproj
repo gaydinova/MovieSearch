@@ -88,28 +88,44 @@
 		0741D7722C3087B1002B40C3 /* MoviSearch */ = {
 			isa = PBXGroup;
 			children = (
+				075924982C4CC6F2007BFE59 /* View Controllers */,
+				075924992C4CC712007BFE59 /* Utils */,
 				0741D7732C3087B1002B40C3 /* AppDelegate.swift */,
-				0741D7772C3087B1002B40C3 /* MovieSearchViewController.swift */,
+				075924712C3E216A007BFE59 /* MovieService.swift */,
+				075924882C4C683C007BFE59 /* MovieServiceError.swift */,
+				075924732C3E3551007BFE59 /* Movie.swift */,
+				0759247E2C44549B007BFE59 /* DataController.swift */,
 				0741D7792C3087B1002B40C3 /* Main.storyboard */,
 				0741D77F2C3087B2002B40C3 /* Assets.xcassets */,
 				0741D7812C3087B2002B40C3 /* LaunchScreen.storyboard */,
 				0741D7842C3087B2002B40C3 /* Info.plist */,
 				0741D77C2C3087B1002B40C3 /* MoviSearch.xcdatamodeld */,
-				075528362C371E8500FC7E70 /* MovieDetailsViewController.swift */,
-				075924712C3E216A007BFE59 /* MovieService.swift */,
-				075924732C3E3551007BFE59 /* Movie.swift */,
-				0759247E2C44549B007BFE59 /* DataController.swift */,
-				075924842C476B25007BFE59 /* FavoritesViewController.swift */,
-				075924862C4C33CD007BFE59 /* FavoriteMovieCell.swift */,
-				075924882C4C683C007BFE59 /* MovieServiceError.swift */,
-				0759248A2C4C8084007BFE59 /* AlertPresentable.swift */,
-				0759248C2C4C83D1007BFE59 /* ImageLoader.swift */,
-				075924902C4CC174007BFE59 /* UILabel+Styling.swift */,
-				075924922C4CC191007BFE59 /* UITextView+Styling.swift */,
-				075924942C4CC1B6007BFE59 /* UIImageView+Styling.swift */,
-				075924962C4CC4B2007BFE59 /* Notification.swift */,
 			);
 			path = MoviSearch;
+			sourceTree = "<group>";
+		};
+		075924982C4CC6F2007BFE59 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				0741D7772C3087B1002B40C3 /* MovieSearchViewController.swift */,
+				075528362C371E8500FC7E70 /* MovieDetailsViewController.swift */,
+				075924842C476B25007BFE59 /* FavoritesViewController.swift */,
+				075924862C4C33CD007BFE59 /* FavoriteMovieCell.swift */,
+			);
+			path = "View Controllers";
+			sourceTree = "<group>";
+		};
+		075924992C4CC712007BFE59 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				0759248A2C4C8084007BFE59 /* AlertPresentable.swift */,
+				075924922C4CC191007BFE59 /* UITextView+Styling.swift */,
+				075924902C4CC174007BFE59 /* UILabel+Styling.swift */,
+				075924942C4CC1B6007BFE59 /* UIImageView+Styling.swift */,
+				075924962C4CC4B2007BFE59 /* Notification.swift */,
+				0759248C2C4C83D1007BFE59 /* ImageLoader.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
