@@ -96,6 +96,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
         favoritesScrollView.showsHorizontalScrollIndicator = true
     }
     
+    // Setup the label that displays when no search results are found
     private func setupNoResultsLabel() {
           noResultsLabel = UILabel()
           noResultsLabel.text = "No Movies Found"
@@ -105,6 +106,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
           noResultsLabel.translatesAutoresizingMaskIntoConstraints = false
           view.addSubview(noResultsLabel)
 
+        // Position the label just below the search bar
           NSLayoutConstraint.activate([
               noResultsLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
               noResultsLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -130)
@@ -112,6 +114,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
           noResultsLabel.isHidden = true
       }
     
+    // Setup the label that displays when no favorites are found
     private func setupEmptyStateLabel() {
         emptyStateLabel = UILabel()
         emptyStateLabel.text = "You have no favorite movies yet."
@@ -204,6 +207,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
         fetchFavorites()
     }
     
+    // Update favorites list when changes occur
     @objc func updateFavorites(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
               let movieId = userInfo["movieId"] as? Int,
@@ -219,6 +223,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
         updateFavoritesUI()
     }
     
+    // Handle movie selection from favorites
     @objc func movieTapped(_ sender: UITapGestureRecognizer) {
         guard let movieId = sender.view?.tag else { return }
         showActivityIndicator()
@@ -237,6 +242,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
     
     // MARK: - Helper Methods
     
+    // Fetch favorite movies from Core Data
     func fetchFavorites() {
         guard let context = managedObjectContext else {
             return
@@ -280,6 +286,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
         }
     }
     
+    // Create a view for a favorite movie
     private func createMovieView(for favoriteMovie: FavoriteMovie) {
         let moviePosterView = UIImageView()
         if let posterPath = favoriteMovie.posterPath {
@@ -313,6 +320,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
         favoritesStackView.addArrangedSubview(movieContainer)
     }
     
+    // Fetch movie details from the service
     func getMovieDetails(movieId: Int, completion: @escaping (Result<MovieDetails, MovieServiceError>) -> Void) {
         movieService.getMovieDetails(movieId: movieId, completion: completion)
     }
@@ -351,7 +359,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
     }
     
     // MARK: - Navigation
-    
+    // Prepare for segue to the movie detail or favorites list screen
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showMovieDetail" {
             if let destinationVC = segue.destination as? MovieDetailsViewController,

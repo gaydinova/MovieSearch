@@ -35,6 +35,8 @@ class MovieDetailsViewController: UIViewController, AlertPresentable {
     var movieDetails: MovieDetails?
     let movieService = MovieService()
     var isFromFavorites: Bool = false
+    
+    // This property updates the favorite icon when its value changes
     var isFavorite: Bool = false {
         didSet {
             DispatchQueue.main.async {
@@ -95,6 +97,7 @@ class MovieDetailsViewController: UIViewController, AlertPresentable {
 
     
     func addDescriptionDivider() {
+        // Adding a divider line above the description label
         let dividerColor = UIColor.lightGray
         let divider = createDivider(color: dividerColor)
         view.addSubview(divider)
@@ -118,6 +121,7 @@ class MovieDetailsViewController: UIViewController, AlertPresentable {
     // MARK: - UI Update Methods
     
     func updateUI(with movie: MovieDetails) {
+        // Hide the favorite icon if the view controller is accessed from the favorites list
         favoriteIcon.isHidden = isFromFavorites
         self.movieName.text = movie.title
         self.descriptionText.text = movie.overview
@@ -126,10 +130,13 @@ class MovieDetailsViewController: UIViewController, AlertPresentable {
         self.movieDuration.text = "\(movie.runtime ?? 0) min"
         self.writerName.text = movie.credits?.crew.filter { $0.job == "Writer" }.map { $0.name }.joined(separator: ", ")
         self.directorName.text = movie.credits?.crew.filter { $0.job == "Director" }.map { $0.name }.joined(separator: ", ")
+        
+        // Display a limited number of cast members
         if let castMembers = movie.credits?.cast.prefix(7) {
             self.castName.text = castMembers.map { $0.name }.joined(separator: ", ")
         }
-        
+       
+        // Load the movie poster image
         if let posterPath = movie.posterPath {
             ImageLoader.shared.loadImage(with: posterPath, into: moviePoster)
         }
@@ -142,7 +149,8 @@ class MovieDetailsViewController: UIViewController, AlertPresentable {
     }
     
     // MARK: - Favorite Handling Methods
-    
+   
+    // Toggle the favorite status of the movie
     @objc func toggleFavorite() {
         guard let context = managedObjectContext, let movieId = movieDetails?.id else {
             showErrorAlert(message: "Managed object context or movie ID not available")
@@ -152,14 +160,17 @@ class MovieDetailsViewController: UIViewController, AlertPresentable {
         isFavorite.toggle()
         updateFavoriteIcon()
         
+        // Perform the favorite status update in the background
         DispatchQueue.global(qos: .background).async {
             do {
+                // Add the movie to favorites
                 if self.isFavorite {
                     let favoritedMovie = FavoriteMovie(context: context)
                     favoritedMovie.id = Int64(movieId)
                     favoritedMovie.title = self.movieDetails?.title
                     favoritedMovie.posterPath = self.movieDetails?.posterPath
                 } else {
+                    // Remove the movie from favorites
                     let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
                     fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
                     
