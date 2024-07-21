@@ -10,12 +10,11 @@ import UIKit
 import CoreData
 
 class FavoritesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, AlertPresentable {
+    @IBOutlet weak var favoritesTableView: UITableView!
     
     var managedObjectContext: NSManagedObjectContext?
     var favoriteMovies: [FavoriteMovie] = []
     let movieService = MovieService()
-    
-    @IBOutlet weak var favoritesTableView: UITableView!
     
     override func viewDidLoad() {
         self.navigationItem.title = "My Favorites"
@@ -37,6 +36,8 @@ class FavoritesViewController: UIViewController, UITableViewDataSource, UITableV
                showErrorAlert(message: "Error fetching favorites: \(error.localizedDescription)")
            }
        }
+    
+    // MARK: - UITableViewDataSource and UITableViewDelegate Methods
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return favoriteMovies.count
@@ -70,6 +71,7 @@ class FavoritesViewController: UIViewController, UITableViewDataSource, UITableV
           }
       }
     
+    // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if
            let destinationVC = segue.destination as? MovieDetailsViewController,

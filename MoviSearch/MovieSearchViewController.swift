@@ -10,7 +10,10 @@ import Nuke
 import NukeExtensions
 import CoreData
 
-class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate, AlertPresentable {
+class MovieSearchViewController: UIViewController, UISearchBarDelegate,
+                                    UITableViewDataSource, UITableViewDelegate, AlertPresentable {
+    
+    // MARK: - Properties
     
     @IBOutlet weak var findMovieLabel: UILabel!
     @IBOutlet weak var searchBar: UISearchBar!
@@ -19,35 +22,68 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     @IBOutlet weak var favoritesLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeightConstraint: NSLayoutConstraint!
-    
     @IBOutlet weak var mainStackView: UIStackView!
-    
     @IBOutlet weak var favoritesLabelHorizontalStackView: UIStackView!
-    
     @IBOutlet weak var searchBarStackView: UIStackView!
-    
     @IBOutlet weak var seeAllButton: UIButton!
     
     var managedObjectContext: NSManagedObjectContext?
     var noResultsLabel: UILabel!
     var emptyStateLabel: UILabel!
-    
     var allMovies: [Movie] = []
     var filteredMovies: [Movie] = []
     let movieService = MovieService()
     var movieDetails: MovieDetails?
     var favorites: Set<Int> = []
     
+    // MARK: - Lifecycle Methods
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupView()
+        setupObservers()
+        fetchFavorites()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchFavorites()
+        clearSearchAndHideTableView()
+    }
+    
+    // MARK: Setup Methods
+    private func setupView() {
         view.backgroundColor = UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 1.0)
+        setupSearchBar()
+        setupTableView()
+        setupFavoritesScrollView()
+        setupNoResultsLabel()
+        setupEmptyStateLabel()
+        styleUI()
+        applyTitleStylingToFavorites()
+    }
+    
+    private func setupObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(handleFavoritesUpdate), name: .didUpdateFavorites, object: nil)
+    }
+    
+    private func setupSearchBar() {
         searchBar.delegate = self
+        searchBar.barTintColor = UIColor.black
+        searchBar.tintColor = UIColor.white
+        searchBar.searchTextField.backgroundColor = UIColor.darkGray
+        searchBar.searchTextField.textColor = UIColor.white
+    }
+    
+    private func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self
         tableViewHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 0)
         tableViewHeightConstraint.isActive = true
         tableView.backgroundColor = UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 1.0)
+    }
+    
+    private func setupFavoritesScrollView() {
         favoritesScrollView.translatesAutoresizingMaskIntoConstraints = false
         favoritesStackView.translatesAutoresizingMaskIntoConstraints = false
         favoritesStackView.heightAnchor.constraint(equalTo: favoritesScrollView.heightAnchor).isActive = true
@@ -55,45 +91,125 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         favoritesStackView.alignment = .leading
         favoritesStackView.spacing = 8
         favoritesScrollView.showsHorizontalScrollIndicator = true
-        setupNoResultsLabel()
-        setupEmptyStateLabel()
-        styleUI()
+    }
+    
+    private func setupNoResultsLabel() {
+        noResultsLabel = UILabel()
+        noResultsLabel.text = "No Movies Found"
+        noResultsLabel.applyTitleStyle()
+        noResultsLabel.textAlignment = .center
+        noResultsLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(noResultsLabel)
+        
+        let bottomPadding: CGFloat = -130.0
+        
+        NSLayoutConstraint.activate([
+            noResultsLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            noResultsLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: bottomPadding)
+        ])
+        noResultsLabel.isHidden = true
+    }
+    
+    private func setupEmptyStateLabel() {
+        emptyStateLabel = UILabel()
+        emptyStateLabel.text = "You have no favorite movies yet."
+        emptyStateLabel.applyTitleStyle()
+        emptyStateLabel.textAlignment = .center
+        emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyStateLabel)
+        
+        NSLayoutConstraint.activate([
+            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        emptyStateLabel.isHidden = true
+    }
+    
+    func setupFavorites() {
+        NotificationCenter.default.addObserver(self, selector: #selector(updateFavorites(_:)), name: .didUpdateFavorites, object: nil)
+    }
+    
+    private func styleUI() {
+        findMovieLabel.applyTitleStyle()
+        favoritesLabel.applySectionTitleStyle()
         applyTitleStylingToFavorites()
+    }
+    
+    // MARK: - UI Update Methods
+    
+    private func applyTitleStylingToFavorites() {
+        for view in favoritesStackView.arrangedSubviews {
+            if let stackView = view as? UIStackView {
+                for subview in stackView.arrangedSubviews {
+                    if let label = subview as? UILabel {
+                        label.applySectionTitleStyle()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func updateTableViewHeight() {
+        tableView.layoutIfNeeded()
+        tableViewHeightConstraint.constant = tableView.contentSize.height
+    }
+    
+    private func hideTableView() {
+        tableViewHeightConstraint.constant = 0
+        tableView.isHidden = true
+    }
+    
+    private func showTableView() {
+        tableView.isHidden = false
+        tableViewHeightConstraint.constant = tableView.contentSize.height
+        tableView.layoutIfNeeded()
+        mainStackView.setCustomSpacing(5, after: searchBarStackView)
+    }
+    
+    private func clearSearchAndHideTableView() {
+        searchBar.text = ""
+        filteredMovies.removeAll()
+        tableView.reloadData()
         hideTableView()
-        fetchFavorites()
     }
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        fetchFavorites()
-        clearSearchAndHideTableView()
-    }
+    
+    // MARK: - Event Handlers
     
     @objc func handleFavoritesUpdate() {
         // Refetch favorites when notification is received
         fetchFavorites()
     }
     
-    func styleUI() {
-        findMovieLabel.font = UIFont.boldSystemFont(ofSize: 24)
-        findMovieLabel.textColor = UIColor.white
-        searchBar.barTintColor = UIColor.black
-        searchBar.tintColor = UIColor.white
-        searchBar.searchTextField.backgroundColor = UIColor.darkGray
-        searchBar.searchTextField.textColor = UIColor.white
-        let titleFont = UIFont.boldSystemFont(ofSize: 16)
-        let titleColor = UIColor.white
+    @objc func updateFavorites(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let movieId = userInfo["movieId"] as? Int,
+              let isFavorite = userInfo["isFavorite"] as? Bool else {
+            return
+        }
         
-        for view in favoritesStackView.arrangedSubviews {
-            if let stackView = view as? UIStackView {
-                for subview in stackView.arrangedSubviews {
-                    if let label = subview as? UILabel {
-                        label.font = titleFont
-                        label.textColor = titleColor
-                    }
+        if isFavorite {
+            favorites.insert(movieId)
+        } else {
+            favorites.remove(movieId)
+        }
+        updateFavoritesUI()
+    }
+    
+    @objc func movieTapped(_ sender: UITapGestureRecognizer) {
+        guard let movieId = sender.view?.tag else { return }
+        getMovieDetails(movieId: movieId) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let movieDetails):
+                    self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
+                case .failure(let error):
+                    self?.showErrorAlert(message: error.localizedDescription)
                 }
             }
         }
     }
+    
+    // MARK: - Helper Methods
     
     func fetchFavorites() {
         guard let context = managedObjectContext else {
@@ -110,24 +226,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func setupFavorites() {
-        NotificationCenter.default.addObserver(self, selector: #selector(updateFavorites(_:)), name: .didUpdateFavorites, object: nil)
-    }
     
-    @objc func updateFavorites(_ notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let movieId = userInfo["movieId"] as? Int,
-              let isFavorite = userInfo["isFavorite"] as? Bool else {
-            return
-        }
-
-        if isFavorite {
-            favorites.insert(movieId)
-        } else {
-            favorites.remove(movieId)
-        }
-        updateFavoritesUI()
-    }
     
     func updateFavoritesUI() {
         favoritesStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -155,23 +254,19 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         }
     }
     
-    func createMovieView(for favoriteMovie: FavoriteMovie) {
+    private func createMovieView(for favoriteMovie: FavoriteMovie) {
         let moviePosterView = UIImageView()
         if let posterPath = favoriteMovie.posterPath {
             ImageLoader.shared.loadImage(with: posterPath, into: moviePosterView)
         }
         
-        moviePosterView.contentMode = .scaleAspectFill
-        moviePosterView.clipsToBounds = true
-        moviePosterView.layer.cornerRadius = 10
-        moviePosterView.translatesAutoresizingMaskIntoConstraints = false
+        moviePosterView.applyPosterStyle()
         moviePosterView.heightAnchor.constraint(equalToConstant: 300).isActive = true
         moviePosterView.widthAnchor.constraint(equalToConstant: 240).isActive = true
         
         let movieTitleLabel = UILabel()
         movieTitleLabel.text = favoriteMovie.title
-        movieTitleLabel.textColor = UIColor.white
-        movieTitleLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        movieTitleLabel.applySectionTitleStyle()
         movieTitleLabel.textAlignment = .center
         movieTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         movieTitleLabel.numberOfLines = 0
@@ -192,57 +287,11 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         favoritesStackView.addArrangedSubview(movieContainer)
     }
     
-    @objc func movieTapped(_ sender: UITapGestureRecognizer) {
-        guard let movieId = sender.view?.tag else { return }
-        getMovieDetails(movieId: movieId) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let movieDetails):
-                    self?.performSegue(withIdentifier: "showMovieDetail", sender: movieDetails)
-                case .failure(let error):
-                    self?.showErrorAlert(message: error.localizedDescription)
-                }
-            }
-        }
-    }
-    
     func getMovieDetails(movieId: Int, completion: @escaping (Result<MovieDetails, MovieServiceError>) -> Void) {
         movieService.getMovieDetails(movieId: movieId, completion: completion)
     }
     
-    func setupNoResultsLabel() {
-        noResultsLabel = UILabel()
-        noResultsLabel.text = "No Movies Found"
-        noResultsLabel.textColor = .white
-        noResultsLabel.textAlignment = .center
-        noResultsLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        noResultsLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(noResultsLabel)
-        
-        let bottomPadding: CGFloat = -130.0
-        
-        NSLayoutConstraint.activate([
-            noResultsLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            noResultsLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: bottomPadding)
-        ])
-        noResultsLabel.isHidden = true
-    }
-    
-    func setupEmptyStateLabel() {
-        emptyStateLabel = UILabel()
-        emptyStateLabel.text = "You have no favorite movies yet."
-        emptyStateLabel.textColor = .white
-        emptyStateLabel.textAlignment = .center
-        emptyStateLabel.font = UIFont.boldSystemFont(ofSize: 18)
-        emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(emptyStateLabel)
-        
-        NSLayoutConstraint.activate([
-            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-        emptyStateLabel.isHidden = true
-    }
+    // MARK: - UISearchBarDelegate Methods
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
@@ -274,46 +323,8 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
             }
         }
     }
-        
-    private func updateTableViewHeight() {
-        tableView.layoutIfNeeded()
-        tableViewHeightConstraint.constant = tableView.contentSize.height
-    }
     
-    private func hideTableView() {
-        tableViewHeightConstraint.constant = 0
-        tableView.isHidden = true
-    }
-    
-    private func showTableView() {
-        tableView.isHidden = false
-        tableViewHeightConstraint.constant = tableView.contentSize.height
-        tableView.layoutIfNeeded()
-        mainStackView.setCustomSpacing(5, after: searchBarStackView)
-    }
-    
-    private func clearSearchAndHideTableView() {
-          searchBar.text = ""
-          filteredMovies.removeAll()
-          tableView.reloadData()
-          hideTableView()
-      }
-    
-    func applyTitleStylingToFavorites() {
-        let titleFont = UIFont.boldSystemFont(ofSize: 16)
-        let titleColor = UIColor.white
-        
-        for view in favoritesStackView.arrangedSubviews {
-            if let stackView = view as? UIStackView {
-                for subview in stackView.arrangedSubviews {
-                    if let label = subview as? UILabel {
-                        label.font = titleFont
-                        label.textColor = titleColor
-                    }
-                }
-            }
-        }
-    }
+    // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showMovieDetail" {
@@ -333,6 +344,8 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     }
 }
 
+// MARK: - UITableViewDataSource and UITableViewDelegate Methods
+
 extension MovieSearchViewController {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return filteredMovies.count
@@ -342,8 +355,8 @@ extension MovieSearchViewController {
         guard indexPath.row < filteredMovies.count else {
             showErrorAlert(message: "Something went wrong. Please try again.")
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-                  cell.textLabel?.text = "Error: Something went wrong"
-                  return cell
+            cell.textLabel?.text = "Error: Something went wrong"
+            return cell
         }
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
@@ -368,8 +381,4 @@ extension MovieSearchViewController {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 40
     }
-}
-
-extension Notification.Name {
-    static let didUpdateFavorites = Notification.Name("didUpdateFavorites")
 }
