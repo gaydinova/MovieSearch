@@ -94,21 +94,20 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
     }
     
     private func setupNoResultsLabel() {
-        noResultsLabel = UILabel()
-        noResultsLabel.text = "No Movies Found"
-        noResultsLabel.applyTitleStyle()
-        noResultsLabel.textAlignment = .center
-        noResultsLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(noResultsLabel)
-        
-        let bottomPadding: CGFloat = -130.0
-        
-        NSLayoutConstraint.activate([
-            noResultsLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            noResultsLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: bottomPadding)
-        ])
-        noResultsLabel.isHidden = true
-    }
+          noResultsLabel = UILabel()
+          noResultsLabel.text = "No Movies Found"
+          noResultsLabel.font = UIFont.boldSystemFont(ofSize: 24)
+          noResultsLabel.textColor = UIColor.white
+          noResultsLabel.textAlignment = .center
+          noResultsLabel.translatesAutoresizingMaskIntoConstraints = false
+          view.addSubview(noResultsLabel)
+
+          NSLayoutConstraint.activate([
+              noResultsLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+              noResultsLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -130)
+          ])
+          noResultsLabel.isHidden = true
+      }
     
     private func setupEmptyStateLabel() {
         emptyStateLabel = UILabel()
@@ -307,7 +306,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate,
                     switch result {
                     case .success(let movies):
                         self?.filteredMovies = movies
-                        self?.noResultsLabel.isHidden = true
+                        self?.noResultsLabel.isHidden = !movies.isEmpty
                     case .failure:
                         self?.filteredMovies = []
                         self?.noResultsLabel.isHidden = false
