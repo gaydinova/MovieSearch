@@ -74,6 +74,7 @@
 			children = (
 				0741D7722C3087B1002B40C3 /* MoviSearch */,
 				0741D7712C3087B1002B40C3 /* Products */,
+				0759249A2C4D4C59007BFE59 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,6 +127,13 @@
 				0759248C2C4C83D1007BFE59 /* ImageLoader.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		0759249A2C4D4C59007BFE59 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
