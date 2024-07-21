@@ -10,7 +10,7 @@ import UIKit
 import CoreData
 import NukeExtensions
 
-class MovieDetailsViewController: UIViewController {
+class MovieDetailsViewController: UIViewController, AlertPresentable {
     
     @IBOutlet weak var moviePoster: UIImageView!
     @IBOutlet weak var movieName: UILabel!
@@ -106,7 +106,7 @@ class MovieDetailsViewController: UIViewController {
                      let favoritedMovie = FavoriteMovie(context: context)
                      favoritedMovie.id = Int64(movieId)
                      favoritedMovie.title = self.movieDetails?.title
-                     favoritedMovie.posterPath = self.movieDetails?.poster_path
+                     favoritedMovie.posterPath = self.movieDetails?.posterPath
                  } else {
                      let fetchRequest: NSFetchRequest<FavoriteMovie> = FavoriteMovie.fetchRequest()
                      fetchRequest.predicate = NSPredicate(format: "id == %d", movieId)
@@ -132,7 +132,7 @@ class MovieDetailsViewController: UIViewController {
         favoriteIcon.isHidden = isFromFavorites
         self.movieName.text = movie.title
         self.descriptionText.text = movie.overview
-        self.movieYear.text = movie.release_date
+        self.movieYear.text = movie.releaseDate
         self.movieGenre.text = movie.genres.map { $0.name }.joined(separator: ", ")
         self.movieDuration.text = "\(movie.runtime ?? 0) min"
         self.writerName.text = movie.credits?.crew.filter { $0.job == "Writer" }.map { $0.name }.joined(separator: ", ")
@@ -141,22 +141,8 @@ class MovieDetailsViewController: UIViewController {
             self.castName.text = castMembers.map { $0.name }.joined(separator: ", ")
         }
         
-        let placeholderImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-        let failureImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-
-        if let posterPath = movie.poster_path, let url = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") {
-            let options = ImageLoadingOptions(
-                placeholder: placeholderImage,
-                failureImage: failureImage,
-                contentModes: .init(
-                    success: .scaleAspectFill,
-                    failure: .scaleAspectFit,
-                    placeholder: .scaleAspectFill
-                )
-            )
-            NukeExtensions.loadImage(with: url, options: options, into: moviePoster)
-        } else {
-            moviePoster.image = placeholderImage
+        if let posterPath = movie.posterPath {
+            ImageLoader.shared.loadImage(with: posterPath, into: moviePoster)
         }
     }
     
@@ -238,11 +224,5 @@ class MovieDetailsViewController: UIViewController {
         divider.translatesAutoresizingMaskIntoConstraints = false
         return divider
     }
-    
-    func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
-    }
-}
+ }
 

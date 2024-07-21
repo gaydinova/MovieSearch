@@ -10,7 +10,7 @@ import Nuke
 import NukeExtensions
 import CoreData
 
-class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate {
+class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate, AlertPresentable {
     
     @IBOutlet weak var findMovieLabel: UILabel!
     @IBOutlet weak var searchBar: UISearchBar!
@@ -156,21 +156,10 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     
     func createMovieView(for favoriteMovie: FavoriteMovie) {
         let moviePosterView = UIImageView()
-        let placeholderImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-        let failureImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-        if let posterPath = favoriteMovie.posterPath, let posterUrl = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") {
-            let options = ImageLoadingOptions(
-                placeholder: placeholderImage,
-                failureImage: failureImage,
-                contentModes: .init(
-                    success: .scaleAspectFill,
-                    failure: .scaleAspectFit,
-                    placeholder: .scaleAspectFill
-                )
-            )
-            
-            NukeExtensions.loadImage(with: posterUrl, options: options, into: moviePosterView)
+        if let posterPath = favoriteMovie.posterPath {
+            ImageLoader.shared.loadImage(with: posterPath, into: moviePosterView)
         }
+        
         moviePosterView.contentMode = .scaleAspectFill
         moviePosterView.clipsToBounds = true
         moviePosterView.layer.cornerRadius = 10
@@ -282,13 +271,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
             }
         }
     }
-    
-    func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
-    }
-    
+        
     private func updateTableViewHeight() {
         tableView.layoutIfNeeded()
         tableViewHeightConstraint.constant = tableView.contentSize.height

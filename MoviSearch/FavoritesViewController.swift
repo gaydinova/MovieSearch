@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import CoreData
 
-class FavoritesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class FavoritesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, AlertPresentable {
     
     var managedObjectContext: NSManagedObjectContext?
     var favoriteMovies: [FavoriteMovie] = []
@@ -78,11 +78,5 @@ class FavoritesViewController: UIViewController, UITableViewDataSource, UITableV
                  destinationVC.isFromFavorites = isFromFavorites
              }
         }
-    
-    func showErrorAlert(message: String) {
-        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
-    }
     }
 

@@ -17,22 +17,8 @@ class FavoriteMovieCell: UITableViewCell {
     func configure(with movie: FavoriteMovie) {
         favoriteMovieTitleLabel.text = movie.title
 
-        let placeholderImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-        let failureImage = UIImage(systemName: "photo.fill")?.withTintColor(.gray, renderingMode: .alwaysOriginal)
-
-        if let posterPath = movie.posterPath, let url = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") {
-            let options = ImageLoadingOptions(
-                placeholder: placeholderImage,
-                failureImage: failureImage,
-                contentModes: .init(
-                    success: .scaleAspectFill,
-                    failure: .scaleAspectFit,
-                    placeholder: .scaleAspectFill
-                )
-            )
-            NukeExtensions.loadImage(with: url, options: options, into: favoriteMovieImageView)
-        } else {
-            favoriteMovieImageView.image = placeholderImage
+        if let posterPath = movie.posterPath {
+            ImageLoader.shared.loadImage(with: posterPath, into: favoriteMovieImageView)
         }
     }
 }
