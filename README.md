@@ -1,7 +1,6 @@
 # MoviSearch App
 
-MoviSearchApp is an iOS application that allows users to search for movies, view detailed information about selected movies, and manage a list of favorite movies. The app features a user-friendly interface with a search bar, a list of search results, and a detailed view for each movie. Users can also view and manage their favorite movies, which are stored locally.
-
+MoviSearchApp is an iOS application that allows users to search for movies, view detailed information about selected movies, and manage a list of favorite movies. The application fetches movie data from The Movie Database (TMDB) API.
 ## Features
 
 - **Search for Movies:** Users can search for movies using a search bar. The search results are displayed in a list format.
