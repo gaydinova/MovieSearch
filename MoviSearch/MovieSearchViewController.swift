@@ -65,6 +65,7 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchFavorites()
+        clearSearchAndHideTableView()
     }
     
     @objc func handleFavoritesUpdate() {
@@ -249,7 +250,9 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
             hideTableView()
             tableView.reloadData()
             noResultsLabel.isHidden = true
+            emptyStateLabel.isHidden = favorites.isEmpty ? false : true
         } else {
+            emptyStateLabel.isHidden = true
             movieService.searchMovies(query: searchText) { [weak self] result in
                 DispatchQueue.main.async {
                     switch result {
@@ -288,6 +291,13 @@ class MovieSearchViewController: UIViewController, UISearchBarDelegate, UITableV
         tableView.layoutIfNeeded()
         mainStackView.setCustomSpacing(5, after: searchBarStackView)
     }
+    
+    private func clearSearchAndHideTableView() {
+          searchBar.text = ""
+          filteredMovies.removeAll()
+          tableView.reloadData()
+          hideTableView()
+      }
     
     func applyTitleStylingToFavorites() {
         let titleFont = UIFont.boldSystemFont(ofSize: 16)

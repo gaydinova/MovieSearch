@@ -43,10 +43,6 @@ class MovieService: NSObject, URLSessionDelegate {
         makeRequest(url: url, completion: completion)
     }
     
-    
-
-
-    
     func searchMovies(query: String, completion: @escaping (Result<[Movie], MovieServiceError>) -> Void) {
         let urlString = "\(baseUrl)/search/movie"
         guard var components = URLComponents(string: urlString) else {
